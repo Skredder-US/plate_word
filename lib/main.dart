@@ -39,25 +39,49 @@ class _MyHomePageState extends State<MyHomePage> {
           // img cannot resize larger than original (1200px)
           var imgWidth = min((width / 1.2).round(), 1200);
           var imgHeight = (imgWidth / 2).round();
+          var imgTop = height / 12;
+          var imgLeft = width / 12;
+          var pad = 120;
+          var textLeft = min(imgLeft * 2, imgLeft + pad);
+          var inputPadding = min(textLeft / 2, pad).toDouble();
 
           return Stack(
             children: <Widget>[
               Positioned(
-                top: height / 6,
-                left: width / 12,
+                top: imgTop,
+                left: imgLeft,
                 child: Image(
                     image: ResizeImage(const AssetImage('assets/wa_plate.png'),
                         width: imgWidth, height: imgHeight)),
               ),
               Positioned(
-                top: height / 6 + imgHeight / 3,
-                left: min(width / 6, width / 12 + 120),
+                top: imgTop + imgHeight / 3,
+                left: textLeft,
                 child: DefaultTextStyle(
                   style: TextStyle(
                       color: const Color.fromRGBO(12, 19, 74, 1),
                       fontSize: imgWidth / 4,
                       fontFamily: 'LicensePlate'),
                   child: const Text('ABC1234'),
+                ),
+              ),
+              Positioned(
+                top: imgTop + imgHeight + 25,
+                left: imgLeft,
+                width: min(width / 1.2, 1200),
+                child: TextField(
+                  style: TextStyle(
+                      color: const Color.fromRGBO(12, 19, 74, 1),
+                      fontSize: imgWidth / 4,
+                      fontFamily: 'LicensePlate'),
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    contentPadding: EdgeInsets.only(
+                        left: inputPadding,
+                        top: inputPadding,
+                        bottom: inputPadding - 15),
+                    hintText: 'ABC',
+                  ),
                 ),
               ),
             ],

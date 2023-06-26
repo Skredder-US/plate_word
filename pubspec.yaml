@@ -90,6 +90,7 @@ flutter:
   # see https://flutter.dev/custom-fonts/#from-packages
   assets:
     - assets/wa_plate.png
+    - assets/word_list.txt
   fonts:
     - family: LicensePlate
       fonts:

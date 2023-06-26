@@ -1,8 +1,12 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'dart:convert';
 import 'dart:math';
+import 'dart:async' show Future;
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 var color = const Color.fromRGBO(12, 19, 74, 1);
+List<String> wordList = [];
 
 void main() {
   runApp(const MyApp());
@@ -13,23 +17,29 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-        create: (context) => MyAppState(),
-        child: MaterialApp(
-          title: 'Plate Word',
-          theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlue),
-            useMaterial3: true,
-          ),
-          home: const MyHomePage(),
-        ));
+    return MaterialApp(
+      title: 'Plate Word',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlue),
+        useMaterial3: true,
+      ),
+      home: MyHomePage(),
+    );
   }
 }
 
-class MyAppState extends ChangeNotifier {}
-
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
+  MyHomePage({super.key}) {
+    var futureWordList = getFileData();
+    futureWordList.then((words) {
+      LineSplitter ls = const LineSplitter();
+      wordList = ls.convert(words);
+    });
+  }
+
+  Future<String> getFileData() async {
+    return await rootBundle.loadString('assets/word_list.txt');
+  }
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -42,8 +52,11 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     // Randomly generate a Washington plate
     var plate = '';
+    var letters = '';
     for (var i = 0; i < 2; i++) {
-      plate += String.fromCharCode(random.nextInt(26) + 65);
+      var letter = String.fromCharCode(random.nextInt(26) + 65);
+      plate += letter;
+      letters += letter;
     }
 
     // "The letters I, O, and Q will not be used in the third position on the
@@ -53,6 +66,7 @@ class _MyHomePageState extends State<MyHomePage> {
       letter = String.fromCharCode(random.nextInt(26) + 65);
     } while (letter == 'I' || letter == 'O' || letter == 'Q');
     plate += letter;
+    letters += letter;
 
     for (var i = 0; i < 4; i++) {
       plate += random.nextInt(9).toString();
@@ -108,7 +122,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         left: inputPadding,
                         top: inputPadding,
                         bottom: inputPadding - 15),
-                    hintText: plate.substring(0, 3),
+                    hintText: letters,
                   ),
                 ),
               ),
@@ -119,7 +133,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     onPressed: () {
                       showDialog(
                           context: context,
-                          builder: (_) => _AnswerDialog(imgWidth, height));
+                          builder: (_) =>
+                              _AnswerDialog(imgWidth, height, letters));
                     },
                     child: const Text('Submit'),
                   )),
@@ -132,7 +147,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   onPressed: () {
                     showDialog(
                         context: context,
-                        builder: (_) => _AnswerDialog(imgWidth, height));
+                        builder: (_) =>
+                            _AnswerDialog(imgWidth, height, letters));
                   },
                 ),
               ),
@@ -181,9 +197,10 @@ class _MyHomePageState extends State<MyHomePage> {
 class _AnswerDialog extends StatelessWidget {
   final int imgWidth;
   final double height;
+  final String letters;
   final _scrollController = ScrollController();
 
-  _AnswerDialog(this.imgWidth, this.height);
+  _AnswerDialog(this.imgWidth, this.height, this.letters);
 
   @override
   Widget build(BuildContext context) {
@@ -205,6 +222,7 @@ class _AnswerDialog extends StatelessWidget {
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
+                var answers = _getAnswers(letters);
                 showDialog(
                     context: context,
                     builder: (_) => Material(
@@ -218,14 +236,14 @@ class _AnswerDialog extends StatelessWidget {
                                 controller: _scrollController,
                                 child: ListView.builder(
                                   controller: _scrollController,
-                                  itemCount: 50,
+                                  itemCount: answers.length,
                                   itemBuilder: (context, index) => ListTile(
                                     title: DefaultTextStyle(
                                       style: TextStyle(
                                           color: color,
                                           fontSize: imgWidth / 12,
                                           fontFamily: 'LicensePlate'),
-                                      child: Text('$index'),
+                                      child: Text(answers[index]),
                                     ),
                                   ),
                                 ),
@@ -240,5 +258,30 @@ class _AnswerDialog extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  List<String> _getAnswers(var letters) {
+    List<String> answers = [];
+    for (String word in wordList) {
+      if (_isMatch(letters, word)) {
+        answers.add(word);
+      }
+    }
+
+    return answers;
+  }
+
+  bool _isMatch(var letters, String word) {
+    var i = 0;
+    for (int j = 0; j < word.length; j++) {
+      if (word[j].toUpperCase() == letters[i]) {
+        i++;
+      }
+
+      if (i == 3) {
+        return true;
+      }
+    }
+    return false;
   }
 }

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'dart:math'; // for 'min'
+
+var color = const Color.fromRGBO(12, 19, 74, 1);
 
 void main() {
   runApp(const MyApp());
@@ -10,16 +13,20 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Plate Word',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlue),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(),
-    );
+    return ChangeNotifierProvider(
+        create: (context) => MyAppState(),
+        child: MaterialApp(
+          title: 'Plate Word',
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlue),
+            useMaterial3: true,
+          ),
+          home: const MyHomePage(),
+        ));
   }
 }
+
+class MyAppState extends ChangeNotifier {}
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -43,7 +50,6 @@ class _MyHomePageState extends State<MyHomePage> {
           var pad = 60;
           var textLeft = min(imgLeft * 2, imgLeft + pad);
           var inputPadding = min(textLeft / 2, pad).toDouble();
-          var color = const Color.fromRGBO(12, 19, 74, 1);
           var buttonTop = height / 1.2;
           var buttonLeft = width / 2;
 
@@ -90,7 +96,11 @@ class _MyHomePageState extends State<MyHomePage> {
                   top: buttonTop,
                   left: buttonLeft - 50,
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      showDialog(
+                          context: context,
+                          builder: (_) => _AnswerDialog(imgWidth, height));
+                    },
                     child: const Text('Submit'),
                   )),
               Positioned(
@@ -99,7 +109,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: IconButton(
                   icon: const Icon(Icons.report),
                   tooltip: 'Impossible!',
-                  onPressed: () {},
+                  onPressed: () {
+                    showDialog(
+                        context: context,
+                        builder: (_) => _AnswerDialog(imgWidth, height));
+                  },
                 ),
               ),
               Positioned(
@@ -139,6 +153,71 @@ class _MyHomePageState extends State<MyHomePage> {
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+class _AnswerDialog extends StatelessWidget {
+  final int imgWidth;
+  final double height;
+  final _scrollController = ScrollController();
+
+  _AnswerDialog(this.imgWidth, this.height);
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            DefaultTextStyle(
+              style: TextStyle(
+                  color: color,
+                  fontSize: imgWidth / 4,
+                  fontFamily: 'LicensePlate'),
+              child: const Text('Correct'),
+            ),
+            const SizedBox(height: 15),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                showDialog(
+                    context: context,
+                    builder: (_) => Material(
+                          type: MaterialType.transparency,
+                          child: Center(
+                            child: Container(
+                              width: imgWidth / 1.2,
+                              height: height / 1.4,
+                              color: Colors.white,
+                              child: Scrollbar(
+                                controller: _scrollController,
+                                child: ListView.builder(
+                                  controller: _scrollController,
+                                  itemCount: 50,
+                                  itemBuilder: (context, index) => ListTile(
+                                    title: DefaultTextStyle(
+                                      style: TextStyle(
+                                          color: color,
+                                          fontSize: imgWidth / 12,
+                                          fontFamily: 'LicensePlate'),
+                                      child: Text('$index'),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ));
+              },
+              child: const Text('See answers'),
+            ),
+          ],
+        ),
       ),
     );
   }

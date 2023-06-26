@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'dart:math'; // for 'min'
+import 'dart:math';
 
 var color = const Color.fromRGBO(12, 19, 74, 1);
 
@@ -36,8 +36,28 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  var random = Random();
+
   @override
   Widget build(BuildContext context) {
+    // Randomly generate a Washington plate
+    var plate = '';
+    for (var i = 0; i < 2; i++) {
+      plate += String.fromCharCode(random.nextInt(26) + 65);
+    }
+
+    // "The letters I, O, and Q will not be used in the third position on the
+    //  new 7 character plates." - licenseplates.cc/WA
+    String letter;
+    do {
+      letter = String.fromCharCode(random.nextInt(26) + 65);
+    } while (letter == 'I' || letter == 'O' || letter == 'Q');
+    plate += letter;
+
+    for (var i = 0; i < 4; i++) {
+      plate += random.nextInt(9).toString();
+    }
+
     return Scaffold(
       body: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
@@ -70,7 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       color: color,
                       fontSize: imgWidth / 4,
                       fontFamily: 'LicensePlate'),
-                  child: const Text('ABC1234'),
+                  child: Text(plate),
                 ),
               ),
               Positioned(
@@ -88,7 +108,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         left: inputPadding,
                         top: inputPadding,
                         bottom: inputPadding - 15),
-                    hintText: 'ABC',
+                    hintText: plate.substring(0, 3),
                   ),
                 ),
               ),

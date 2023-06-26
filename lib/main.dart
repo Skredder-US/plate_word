@@ -5,7 +5,7 @@ import 'dart:async' show Future;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
-var color = const Color.fromRGBO(12, 19, 74, 1);
+const color = const Color.fromRGBO(12, 19, 74, 1);
 List<String> wordList = [];
 
 void main() {
@@ -87,7 +87,7 @@ class _MyHomePageState extends State<MyHomePage> {
           var pad = 60;
           var textLeft = min(imgLeft * 2, imgLeft + pad);
           var inputPadding = min(textLeft / 2, pad).toDouble();
-          var buttonTop = height / 1.2;
+          var buttonTop = height / 1.15;
           var buttonLeft = width / 2;
 
           return Stack(
@@ -158,37 +158,11 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               Positioned(
                 top: buttonTop - 4,
-                left: buttonLeft + 50,
+                left: buttonLeft + 55,
                 child: IconButton(
-                  icon: const Icon(Icons.info),
-                  tooltip: 'Info',
-                  onPressed: () => showDialog<String>(
-                    context: context,
-                    builder: (BuildContext context) => Dialog(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            const Text(
-                                'Enter a word that contains the letters found '
-                                'on the plate in the order found on the plate. '
-                                'Example: "ABC1234" can be "Abacus" because '
-                                'Abacus has A before B before C.'),
-                            const SizedBox(height: 15),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              child: const Text('Close'),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+                    icon: const Icon(Icons.done),
+                    tooltip: 'Done',
+                    onPressed: () => {setState(() {})}),
               ),
             ],
           );

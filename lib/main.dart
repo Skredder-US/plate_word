@@ -162,7 +162,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: IconButton(
                     icon: const Icon(Icons.done),
                     tooltip: 'Done',
-                    onPressed: () => {setState(() {})}),
+                    onPressed: () => {textController.clear(), setState(() {})}),
               ),
             ],
           );

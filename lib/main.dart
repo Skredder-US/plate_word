@@ -47,6 +47,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   var random = Random();
+  final textController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -71,6 +72,8 @@ class _MyHomePageState extends State<MyHomePage> {
     for (var i = 0; i < 4; i++) {
       plate += random.nextInt(9).toString();
     }
+
+    var answers = _getAnswers(letters);
 
     return Scaffold(
       body: LayoutBuilder(
@@ -112,6 +115,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 left: imgLeft,
                 width: imgWidth.toDouble(),
                 child: TextField(
+                  controller: textController,
                   style: TextStyle(
                       color: color,
                       fontSize: imgWidth / 4,
@@ -133,8 +137,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     onPressed: () {
                       showDialog(
                           context: context,
-                          builder: (_) =>
-                              _AnswerDialog(imgWidth, height, letters));
+                          builder: (_) => _AnswerDialog(imgWidth, height,
+                              textController.text, answers, false));
                     },
                     child: const Text('Submit'),
                   )),
@@ -147,8 +151,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   onPressed: () {
                     showDialog(
                         context: context,
-                        builder: (_) =>
-                            _AnswerDialog(imgWidth, height, letters));
+                        builder: (_) => _AnswerDialog(imgWidth, height,
+                            textController.text, answers, true));
                   },
                 ),
               ),
@@ -192,18 +196,61 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+
+  List<String> _getAnswers(var letters) {
+    List<String> answers = [];
+    for (String word in wordList) {
+      if (_isMatch(letters, word)) {
+        answers.add(word);
+      }
+    }
+
+    return answers;
+  }
+
+  bool _isMatch(var letters, String word) {
+    var i = 0;
+    for (int j = 0; j < word.length; j++) {
+      if (word[j].toUpperCase() == letters[i]) {
+        i++;
+      }
+
+      if (i == 3) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 class _AnswerDialog extends StatelessWidget {
   final int imgWidth;
   final double height;
-  final String letters;
+  final String guess;
+  final List<String> answers;
+  final bool guessedImpossible;
   final _scrollController = ScrollController();
 
-  _AnswerDialog(this.imgWidth, this.height, this.letters);
+  _AnswerDialog(this.imgWidth, this.height, this.guess, this.answers,
+      this.guessedImpossible);
 
   @override
   Widget build(BuildContext context) {
+    String alert;
+    if (guessedImpossible) {
+      if (answers.isEmpty) {
+        alert = 'Correct';
+      } else {
+        alert = 'Incorrect';
+      }
+    } else {
+      if (answers.contains(guess.toLowerCase())) {
+        alert = 'Correct';
+      } else {
+        alert = 'Incorrect';
+      }
+    }
+
     return Dialog(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -214,15 +261,14 @@ class _AnswerDialog extends StatelessWidget {
             DefaultTextStyle(
               style: TextStyle(
                   color: color,
-                  fontSize: imgWidth / 4,
+                  fontSize: imgWidth / 6,
                   fontFamily: 'LicensePlate'),
-              child: const Text('Correct'),
+              child: Text(alert),
             ),
             const SizedBox(height: 15),
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
-                var answers = _getAnswers(letters);
                 showDialog(
                     context: context,
                     builder: (_) => Material(
@@ -258,30 +304,5 @@ class _AnswerDialog extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  List<String> _getAnswers(var letters) {
-    List<String> answers = [];
-    for (String word in wordList) {
-      if (_isMatch(letters, word)) {
-        answers.add(word);
-      }
-    }
-
-    return answers;
-  }
-
-  bool _isMatch(var letters, String word) {
-    var i = 0;
-    for (int j = 0; j < word.length; j++) {
-      if (word[j].toUpperCase() == letters[i]) {
-        i++;
-      }
-
-      if (i == 3) {
-        return true;
-      }
-    }
-    return false;
   }
 }
